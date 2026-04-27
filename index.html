@@ -247,7 +247,7 @@
                 if (snap.val().password === pass) goMain(login);
                 else alert("Ошибка при входе");
             } else {
-                ref.set({ password: pass, balance: 1000 }).then(() => goMain(login));
+                ref.set({ password: pass, balance: 0 }).then(() => goMain(login));
             }
         });
     }
