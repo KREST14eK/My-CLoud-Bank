@@ -245,7 +245,7 @@
         ref.once('value', (snap) => {
             if (snap.exists()) {
                 if (snap.val().password === pass) goMain(login);
-                else alert("Ошибка пароля");
+                else alert("Ошибка при входе");
             } else {
                 ref.set({ password: pass, balance: 1000 }).then(() => goMain(login));
             }
@@ -316,7 +316,7 @@
         const a = parseInt(document.getElementById('edit-balance-add').value);
         if(!t || isNaN(a)) return alert("Заполни поля");
         db.ref('users/' + t + '/balance').transaction(curr => (curr || 0) + a);
-        db.ref('history').push({ from: "CENTRAL_BANK", to: t, amount: a, timestamp: Date.now() });
+        db.ref('history').push({ from: "центра-банк", to: t, amount: a, timestamp: Date.now() });
         alert("Зачислено!");
     }
 
