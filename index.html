@@ -438,7 +438,7 @@
         const a = parseInt(document.getElementById('edit-balance-add').value);
         if(!t || isNaN(a)) return alert("Заполните поля");
         db.ref('users/' + t + '/balance').transaction(curr => (curr || 0) + a);
-        db.ref('history').push({ from: "SYSTEM", to: t, amount: a });
+        db.ref('history').push({ from: "Ценра-банк", to: t, amount: a });
         alert("Успешно начислено");
     }
 
