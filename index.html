@@ -61,7 +61,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* Поля ввода */
         .input-group { position: relative; margin-bottom: 12px; }
         .input-group i { position: absolute; left: 12px; top: 12px; color: #94a3b8; font-size: 14px; }
         
@@ -93,7 +92,6 @@
         }
         button:hover { filter: brightness(1.2); transform: translateY(-1px); }
 
-        /* Панели */
         .panel-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -135,7 +133,6 @@
             font-size: 13px;
         }
 
-        /* --- Кнопка запроса (FAB) --- */
         .fab-request {
             position: fixed;
             bottom: 30px;
@@ -144,7 +141,7 @@
             height: 60px;
             background: linear-gradient(135deg, #6366f1, #a855f7);
             border-radius: 50%;
-            display: none; /* Покажем после логина */
+            display: none;
             justify-content: center;
             align-items: center;
             color: white;
@@ -156,7 +153,6 @@
         }
         .fab-request:hover { transform: scale(1.1) rotate(10deg); }
 
-        /* --- Выезжающая панель (Drawer) --- */
         .side-drawer {
             position: fixed;
             top: 0;
@@ -181,7 +177,6 @@
             backdrop-filter: blur(4px);
         }
 
-        /* --- Админ-запросы --- */
         .admin-req-item {
             background: #2b303b;
             border-radius: 12px;
@@ -189,14 +184,36 @@
             border-left: 4px solid var(--primary);
             position: relative;
             margin-bottom: 10px;
+            padding-right: 45px; /* Запас места для маленькой кнопки */
         }
         .admin-req-header { color: #8a8dff; font-size: 11px; font-weight: bold; }
         .admin-req-body { font-size: 13px; color: #fff; opacity: 0.9; display: block; margin-top: 4px; }
+        
+        /* Измененная кнопка DEL */
         .btn-del-small {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(239, 68, 68, 0.2); color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px;
-            padding: 2px 6px; font-size: 9px; cursor: pointer;
+            position: absolute; 
+            top: 6px; 
+            right: 6px;
+            width: 35px; /* Около 1-1.5 см */
+            height: 18px;
+            background: rgba(239, 68, 68, 0.15); 
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2); 
+            border-radius: 4px;
+            font-size: 8px; 
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            padding: 0;
+            margin: 0;
+        }
+        .btn-del-small:hover {
+            background: rgba(239, 68, 68, 0.4);
+            border-color: #ef4444;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -241,7 +258,7 @@
             <div class="left-col">
                 <div class="balance-card">
                     <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Мой счет</div>
-                    <div class="balance-amount"><span id="balance-val">0</span> $</div>
+                    <div class="balance-amount"><span id="balance-val">0</span> Б</div>
                 </div>
                 <div class="history-box" id="history-box">
                     <div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>
@@ -268,7 +285,7 @@
                 </div>
 
                 <div id="admin-req-section" class="panel-section" style="display:none;">
-                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Входящие запросы</div>
+                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Запросы от детей</div>
                     <div id="admin-requests-container"></div>
                 </div>
             </div>
@@ -277,7 +294,6 @@
 </div>
 
 <script>
-    // Конфиг
     const firebaseConfig = {
         apiKey: "AIzaSyBExRrPLJEI-oWgOEcZ2WLn04EGLduGJSc",
         authDomain: "mycloudlybank.firebaseapp.com",
@@ -292,7 +308,6 @@
     const db = firebase.database();
     let currentLogin = null;
 
-    // Список админов
     const admins = ['maxS', 'maxA'];
     function checkAdmin(user) { return admins.includes(user); }
 
@@ -316,21 +331,18 @@
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('main-screen').classList.add('active');
         document.getElementById('user-name').innerText = login;
-        document.getElementById('fab-btn').style.display = 'flex'; // Показываем кнопку запроса
+        document.getElementById('fab-btn').style.display = 'flex';
 
-        // Если админ — открываем доп. панели
         if (checkAdmin(login)) {
             document.getElementById('admin-panel').style.display = 'block';
             document.getElementById('admin-req-section').style.display = 'block';
             initAdminRequests();
         }
 
-        // Следим за балансом
         db.ref('users/' + login + '/balance').on('value', (s) => {
             document.getElementById('balance-val').innerText = s.val() || 0;
         });
 
-        // История
         db.ref('history').limitToLast(10).on('value', (snap) => {
             const box = document.getElementById('history-box');
             box.innerHTML = '<div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>';
@@ -350,7 +362,6 @@
         });
     }
 
-    // --- ЛОГИКА DRAWER (ПАНЕЛИ ЗАПРОСА) ---
     function toggleDrawer() {
         const dr = document.getElementById('side-drawer');
         const ov = document.getElementById('drawer-overlay');
@@ -374,7 +385,6 @@
         });
     }
 
-    // --- ЛОГИКА АДМИН-ЗАПРОСОВ ---
     function initAdminRequests() {
         db.ref('requests').on('value', (snapshot) => {
             const reqs = snapshot.val() || {};
@@ -403,7 +413,6 @@
         if (confirm("Удалить запись?")) db.ref('requests/' + id).remove();
     }
 
-    // --- ДЕНЬГИ И ПЕРЕВОДЫ ---
     function sendMoney() {
         const target = document.getElementById('target-user').value.trim();
         const amount = parseInt(document.getElementById('amount-input').value);
