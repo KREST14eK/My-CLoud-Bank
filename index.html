@@ -16,6 +16,7 @@
             --card-bg: rgba(30, 41, 59, 0.8);
             --text: #f1f5f9;
             --accent: #ef4444;
+            --success: #22c55e;
         }
 
         body {
@@ -28,6 +29,7 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -38,13 +40,14 @@
             border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 900px; /* Увеличил ширину для двух колонок */
+            max-width: 900px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* Сетка для главного экрана */
         .dashboard {
             display: grid;
-            grid-template-columns: 1fr 1.2fr; /* Лево - профиль, Право - управление */
+            grid-template-columns: 1fr 1.2fr;
             gap: 25px;
             margin-top: 20px;
         }
@@ -62,7 +65,7 @@
         .input-group { position: relative; margin-bottom: 12px; }
         .input-group i { position: absolute; left: 12px; top: 12px; color: #94a3b8; font-size: 14px; }
         
-        input {
+        input, textarea {
             width: 100%;
             padding: 10px 10px 10px 35px;
             background: rgba(15, 23, 42, 0.7);
@@ -73,7 +76,7 @@
             box-sizing: border-box;
             transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.9); }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.9); }
 
         button {
             width: 100%;
@@ -90,7 +93,25 @@
         }
         button:hover { filter: brightness(1.2); transform: translateY(-1px); }
 
-        /* Левая колонка */
+        /* Панели */
+        .panel-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+        .panel-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .balance-card {
             background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             padding: 20px;
@@ -114,53 +135,100 @@
             font-size: 13px;
         }
 
-        /* Правая колонка (Панели) */
-        .panel-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 18px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-        }
-        .panel-title {
-            font-size: 13px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            display: flex;
+        /* --- Кнопка запроса (FAB) --- */
+        .fab-request {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 50%;
+            display: none; /* Покажем после логина */
+            justify-content: center;
             align-items: center;
-            gap: 8px;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+            cursor: pointer;
+            z-index: 1000;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .fab-request:hover { transform: scale(1.1) rotate(10deg); }
+
+        /* --- Выезжающая панель (Drawer) --- */
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 300px;
+            height: 100%;
+            background: #1e293b;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            z-index: 1001;
+            transition: 0.4s ease;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-drawer.open { right: 0; }
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none; z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
-        /* Центрирование логина */
-        .login-box { max-width: 400px; margin: 0 auto; }
+        /* --- Админ-запросы --- */
+        .admin-req-item {
+            background: #2b303b;
+            border-radius: 12px;
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .admin-req-header { color: #8a8dff; font-size: 11px; font-weight: bold; }
+        .admin-req-body { font-size: 13px; color: #fff; opacity: 0.9; display: block; margin-top: 4px; }
+        .btn-del-small {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(239, 68, 68, 0.2); color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px;
+            padding: 2px 6px; font-size: 9px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
+<div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
+
+<div id="fab-btn" class="fab-request" onclick="toggleDrawer()">
+    <i class="fas fa-comment-dots"></i>
+</div>
+
+<div id="side-drawer" class="side-drawer">
+    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос</h3>
+    <p style="font-size: 12px; opacity: 0.6; margin-bottom: 20px;">Администрация рассмотрит ваше сообщение в ближайшее время.</p>
+    <textarea id="request-text" style="height: 150px; padding: 12px 15px; margin-bottom: 15px;" placeholder="Опишите ваш вопрос..."></textarea>
+    <button onclick="sendRequestToServer()">Отправить запрос</button>
+    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
+</div>
+
 <div class="container">
     <div id="login-screen" class="screen active">
-        <div class="login-box">
-            <div style="text-align: center; margin-bottom: 25px;">
-                <i class="fas fa-shield-halved" style="font-size: 50px; color: var(--primary);"></i>
-                <h2 style="margin: 10px 0 0 0;">G-COIN</h2>
-                <p style="opacity: 0.6; font-size: 14px;"></p>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" id="login-input" placeholder="Логин">
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="pass-input" placeholder="Пароль">
-            </div>
+        <div style="max-width: 320px; margin: 0 auto; text-align: center;">
+            <i class="fas fa-shield-halved" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+            <h2 style="margin: 0 0 25px 0;">G-COIN</h2>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="login-input" placeholder="Логин"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="pass-input" placeholder="Пароль"></div>
             <button onclick="auth()">Войти в систему</button>
         </div>
     </div>
 
     <div id="main-screen" class="screen">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div style="font-weight: bold; font-size: 18px;">
                 <i class="fas fa-user-circle"></i> <span id="user-name"></span>
             </div>
@@ -172,48 +240,36 @@
         <div class="dashboard">
             <div class="left-col">
                 <div class="balance-card">
-                    <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px;">Мой счет</div>
+                    <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Мой счет</div>
                     <div class="balance-amount"><span id="balance-val">0</span> $</div>
                 </div>
-
                 <div class="history-box" id="history-box">
-                    <div class="panel-title" style="margin-bottom: 5px;"><i class="fas fa-list-ul"></i> Последние операции</div>
-                    </div>
+                    <div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>
+                </div>
             </div>
 
             <div class="right-col">
                 <div class="panel-section">
                     <div class="panel-title"><i class="fas fa-paper-plane"></i> Быстрый перевод</div>
-                    <div class="input-group">
-                        <i class="fas fa-at"></i>
-                        <input type="text" id="target-user" placeholder="Логин получателя">
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-coins"></i>
-                        <input type="number" id="amount-input" placeholder="Сумма">
-                    </div>
-                    <button style="background: #22c55e;" onclick="sendMoney()">Отправить средства</button>
+                    <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Логин получателя"></div>
+                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
+                    <button style="background: var(--success);" onclick="sendMoney()">Отправить средства</button>
                 </div>
 
                 <div id="admin-panel" class="panel-section" style="border-color: var(--accent); display:none;">
-                    <div class="panel-title" style="color: var(--accent);"><i class="fas fa-user-shield"></i> Контрольная панель</div>
-                    
-                    <p style="font-size: 11px; opacity: 0.7; margin-bottom: 10px;">выдача денег:</p>
-                    <div class="input-group">
-                        <i class="fas fa-wallet"></i>
-                        <input type="text" id="edit-target-money" placeholder="Логин">
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-plus"></i>
-                        <input type="number" id="edit-balance-add" placeholder="Сколько прибавить">
-                    </div>
+                    <div class="panel-title" style="color: var(--accent);"><i class="fas fa-user-shield"></i> Управление</div>
+                    <div class="input-group"><i class="fas fa-wallet"></i><input type="text" id="edit-target-money" placeholder="Логин для начисления"></div>
+                    <div class="input-group"><i class="fas fa-plus"></i><input type="number" id="edit-balance-add" placeholder="Сумма"></div>
                     <button style="background: var(--accent);" onclick="adminAddMoney()">Начислить</button>
-
-                    <p style="font-size: 11px; opacity: 0.7; margin: 15px 0 10px 0;">РЕДАКТОР АККАУНТА:</p>
-                    <div class="input-group"><i class="fas fa-id-badge"></i><input type="text" id="acc-old-login" placeholder="Кого меняем?"></div>
+                    <hr style="opacity: 0.1; margin: 15px 0;">
+                    <div class="input-group"><i class="fas fa-id-badge"></i><input type="text" id="acc-old-login" placeholder="Кого изменить?"></div>
                     <div class="input-group"><i class="fas fa-user-tag"></i><input type="text" id="acc-new-login" placeholder="Новый логин"></div>
-                    <div class="input-group"><i class="fas fa-key"></i><input type="text" id="acc-new-pass" placeholder="Новый пароль"></div>
-                    <button style="background: #475569;" onclick="adminEditAccount()">Обновить профиль</button>
+                    <button onclick="adminEditAccount()" style="background: #475569;">Обновить данные</button>
+                </div>
+
+                <div id="admin-req-section" class="panel-section" style="display:none;">
+                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Входящие запросы</div>
+                    <div id="admin-requests-container"></div>
                 </div>
             </div>
         </div>
@@ -221,7 +277,7 @@
 </div>
 
 <script>
-    // Твои настройки Firebase (оставляем те же)
+    // Конфиг
     const firebaseConfig = {
         apiKey: "AIzaSyBExRrPLJEI-oWgOEcZ2WLn04EGLduGJSc",
         authDomain: "mycloudlybank.firebaseapp.com",
@@ -236,45 +292,48 @@
     const db = firebase.database();
     let currentLogin = null;
 
+    // Список админов
+    const admins = ['maxS', 'maxA'];
+    function checkAdmin(user) { return admins.includes(user); }
+
     function auth() {
         const login = document.getElementById('login-input').value.trim();
         const pass = document.getElementById('pass-input').value;
-        if (!login || !pass) return alert("Введите данные!");
+        if (!login || !pass) return alert("Введите логин и пароль");
 
-        const ref = db.ref('users/' + login);
-        ref.once('value', (snap) => {
+        db.ref('users/' + login).once('value', (snap) => {
             if (snap.exists()) {
                 if (snap.val().password === pass) goMain(login);
-                else alert("Ошибка при входе");
+                else alert("Неверный пароль");
             } else {
-                ref.set({ password: pass, balance: 0 }).then(() => goMain(login));
+                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => goMain(login));
             }
         });
     }
 
     function goMain(login) {
-        const admins = {'maxS', 'maxA'}
-        function isAdmin(user) { return admins.includes(user); }
-        
         currentLogin = login;
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('main-screen').classList.add('active');
         document.getElementById('user-name').innerText = login;
+        document.getElementById('fab-btn').style.display = 'flex'; // Показываем кнопку запроса
 
-        // Список админов
-        if (isAdmin(sessionUser)) {
+        // Если админ — открываем доп. панели
+        if (checkAdmin(login)) {
             document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('admin-req-section').style.display = 'block';
+            initAdminRequests();
         }
 
-        // Обновление баланса в реальном времени
+        // Следим за балансом
         db.ref('users/' + login + '/balance').on('value', (s) => {
             document.getElementById('balance-val').innerText = s.val() || 0;
         });
 
-        // Лента истории
-        db.ref('history').limitToLast(8).on('value', (snap) => {
+        // История
+        db.ref('history').limitToLast(10).on('value', (snap) => {
             const box = document.getElementById('history-box');
-            box.innerHTML = '<div class="panel-title" style="margin-bottom: 5px;"><i class="fas fa-list-ul"></i> Последние операции</div>';
+            box.innerHTML = '<div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>';
             snap.forEach(child => {
                 const d = child.val();
                 if (d.from === login || d.to === login) {
@@ -282,7 +341,7 @@
                     box.innerHTML += `
                         <div class="trans-item">
                             <span style="color:${isOut?'#f87171':'#4ade80'}; font-weight:bold;">
-                                ${isOut?'<i class="fas fa-arrow-up"></i>': '<i class="fas fa-arrow-down"></i>'} ${d.amount}$
+                                ${isOut?'-': '+'} ${d.amount}$
                             </span>
                             <div style="font-size:11px; opacity:0.6;">${isOut?'Кому: '+d.to : 'От: '+d.from}</div>
                         </div>`;
@@ -291,24 +350,75 @@
         });
     }
 
-    // ЛОГИКА ТРАНЗАКЦИЙ И АДМИНКИ
+    // --- ЛОГИКА DRAWER (ПАНЕЛИ ЗАПРОСА) ---
+    function toggleDrawer() {
+        const dr = document.getElementById('side-drawer');
+        const ov = document.getElementById('drawer-overlay');
+        const isOpen = dr.classList.contains('open');
+        dr.classList.toggle('open');
+        ov.style.display = isOpen ? 'none' : 'block';
+    }
+
+    function sendRequestToServer() {
+        const txt = document.getElementById('request-text').value.trim();
+        if (!txt) return alert("Введите текст сообщения");
+
+        db.ref('requests').push({
+            from: currentLogin,
+            text: txt,
+            timestamp: Date.now()
+        }).then(() => {
+            alert("Запрос успешно отправлен!");
+            document.getElementById('request-text').value = '';
+            toggleDrawer();
+        });
+    }
+
+    // --- ЛОГИКА АДМИН-ЗАПРОСОВ ---
+    function initAdminRequests() {
+        db.ref('requests').on('value', (snapshot) => {
+            const reqs = snapshot.val() || {};
+            const container = document.getElementById('admin-requests-container');
+            container.innerHTML = '';
+            
+            const entries = Object.entries(reqs).reverse();
+            if (entries.length === 0) {
+                container.innerHTML = '<div style="color:gray; font-size:12px; text-align:center;">Запросов нет</div>';
+                return;
+            }
+
+            entries.forEach(([id, r]) => {
+                container.innerHTML += `
+                    <div class="admin-req-item">
+                        <span class="admin-req-header">ОТ: ${r.from}</span>
+                        <span class="admin-req-body">${r.text}</span>
+                        <button class="btn-del-small" onclick="deleteRequest('${id}')">DEL</button>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function deleteRequest(id) {
+        if (confirm("Удалить запись?")) db.ref('requests/' + id).remove();
+    }
+
+    // --- ДЕНЬГИ И ПЕРЕВОДЫ ---
     function sendMoney() {
         const target = document.getElementById('target-user').value.trim();
         const amount = parseInt(document.getElementById('amount-input').value);
-        if (!target || !amount || amount <= 0) return alert("Сумма?");
+        if (!target || !amount || amount <= 0) return alert("Введите корректные данные");
 
-        const myRef = db.ref('users/' + currentLogin + '/balance');
-        const tarRef = db.ref('users/' + target);
-
-        tarRef.once('value', (tsnap) => {
-            if (!tsnap.exists()) return alert("Юзер не найден");
-            myRef.once('value', (msnap) => {
-                const b = msnap.val() || 0;
-                if (b < amount) return alert("Недостаточно средств");
-                myRef.set(b - amount);
-                tarRef.child('balance').set((tsnap.val().balance || 0) + amount);
-                db.ref('history').push({ from: currentLogin, to: target, amount: amount, timestamp: Date.now() });
-                alert("Успешно!");
+        db.ref('users/' + target).once('value', (tsnap) => {
+            if (!tsnap.exists()) return alert("Пользователь не найден");
+            db.ref('users/' + currentLogin + '/balance').once('value', (msnap) => {
+                const myB = msnap.val() || 0;
+                if (myB < amount) return alert("Недостаточно средств");
+                
+                db.ref('users/' + currentLogin + '/balance').set(myB - amount);
+                db.ref('users/' + target + '/balance').transaction(b => (b || 0) + amount);
+                db.ref('history').push({ from: currentLogin, to: target, amount: amount });
+                alert("Перевод выполнен!");
                 document.getElementById('amount-input').value = '';
             });
         });
@@ -317,33 +427,23 @@
     function adminAddMoney() {
         const t = document.getElementById('edit-target-money').value.trim();
         const a = parseInt(document.getElementById('edit-balance-add').value);
-        if(!t || isNaN(a)) return alert("Заполни поля");
+        if(!t || isNaN(a)) return alert("Заполните поля");
         db.ref('users/' + t + '/balance').transaction(curr => (curr || 0) + a);
-        db.ref('history').push({ from: "Центра-банк", to: t, amount: a, timestamp: Date.now() });
-        alert("Зачислено!");
+        db.ref('history').push({ from: "SYSTEM", to: t, amount: a });
+        alert("Успешно начислено");
     }
 
     function adminEditAccount() {
-        const oldLog = document.getElementById('acc-old-login').value.trim();
-        const newLog = document.getElementById('acc-new-login').value.trim();
-        const newPass = document.getElementById('acc-new-pass').value.trim();
-        if(!oldLog) return alert("Кого менять?");
-
-        const ref = db.ref('users/' + oldLog);
-        ref.once('value', (snap) => {
-            if(!snap.exists()) return alert("Нет такого юзера");
-            let data = snap.val();
-            if(newPass) data.password = newPass;
-
-            if(newLog && newLog !== oldLog) {
-                db.ref('users/' + newLog).set(data).then(() => {
-                    ref.remove();
-                    alert("Логин и данные обновлены!");
-                });
-            } else {
-                ref.update({password: data.password});
-                alert("Пароль обновлен!");
-            }
+        const oldL = document.getElementById('acc-old-login').value.trim();
+        const newL = document.getElementById('acc-new-login').value.trim();
+        if(!oldL || !newL) return alert("Заполните логины");
+        
+        db.ref('users/' + oldL).once('value', (snap) => {
+            if(!snap.exists()) return alert("Юзер не найден");
+            db.ref('users/' + newL).set(snap.val()).then(() => {
+                db.ref('users/' + oldL).remove();
+                alert("Логин изменен!");
+            });
         });
     }
 </script>
