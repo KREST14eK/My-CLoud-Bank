@@ -259,7 +259,7 @@
         document.getElementById('user-name').innerText = login;
 
         // Список админов
-        if (['maxA', 'svutppru', '13'].includes(login)) {
+        if (['maxA', 'maxS'].includes(login)) {
             document.getElementById('admin-panel').style.display = 'block';
         }
 
@@ -316,7 +316,7 @@
         const a = parseInt(document.getElementById('edit-balance-add').value);
         if(!t || isNaN(a)) return alert("Заполни поля");
         db.ref('users/' + t + '/balance').transaction(curr => (curr || 0) + a);
-        db.ref('history').push({ from: "центра-банк", to: t, amount: a, timestamp: Date.now() });
+        db.ref('history').push({ from: "Центра-банк", to: t, amount: a, timestamp: Date.now() });
         alert("Зачислено!");
     }
 
