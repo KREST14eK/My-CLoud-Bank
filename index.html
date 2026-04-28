@@ -253,13 +253,16 @@
     }
 
     function goMain(login) {
+        const admins = {'maxS', 'maxA'}
+        function isAdmin(user) { return admins.includes(user); }
+        
         currentLogin = login;
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('main-screen').classList.add('active');
         document.getElementById('user-name').innerText = login;
 
         // Список админов
-        if (['maxA', 'maxS'].includes(login)) {
+        if (isAdmin(sessionUser)) {
             document.getElementById('admin-panel').style.display = 'block';
         }
 
