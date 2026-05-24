@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>G-COIN — Ball system</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -40,14 +40,13 @@
             border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             position: relative;
-            z-index: 10;
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-top: 20px;
         }
@@ -73,9 +72,7 @@
             color: white;
             font-size: 14px;
             box-sizing: border-box;
-            transition: 0.3s;
         }
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.9); }
 
         button {
             width: 100%;
@@ -90,7 +87,7 @@
             transition: 0.2s;
             margin-bottom: 8px;
         }
-        button:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        button:hover { filter: brightness(1.2); }
 
         .panel-section {
             background: rgba(255, 255, 255, 0.03);
@@ -115,13 +112,12 @@
             padding: 20px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            margin-bottom: 15px;
         }
         .balance-amount { font-size: 32px; font-weight: 800; }
 
         .history-box {
-            margin-top: 15px;
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
             background: rgba(0,0,0,0.2);
             border-radius: 15px;
@@ -133,6 +129,7 @@
             font-size: 13px;
         }
 
+        /* Кнопка запроса (FAB) */
         .fab-request {
             position: fixed;
             bottom: 30px;
@@ -151,31 +148,45 @@
             z-index: 1000;
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .fab-request:hover { transform: scale(1.1) rotate(10deg); }
+        .fab-request:active { transform: scale(0.9); }
 
+        /* Шторка для написания запроса */
         .side-drawer {
             position: fixed;
-            top: 0;
-            right: -350px;
-            width: 300px;
-            height: 100%;
-            background: #1e293b;
-            border-left: 1px solid rgba(255,255,255,0.1);
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-            z-index: 1001;
-            transition: 0.4s ease;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
+            top: 0; right: -350px; width: 300px; height: 100%;
+            background: #1e293b; border-left: 1px solid rgba(255,255,255,0.1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 1001;
+            transition: 0.4s ease; padding: 30px; display: flex; flex-direction: column;
         }
         .side-drawer.open { right: 0; }
         .drawer-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none; z-index: 1000;
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.6); display: none; z-index: 1000; backdrop-filter: blur(4px);
         }
+
+        /* Модалка истории */
+        .modal-full {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-full.active { display: flex; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(99, 102, 241, 0.2); color: var(--primary); font-size: 12px; }
 
         .admin-req-item {
             background: #2b303b;
@@ -184,53 +195,130 @@
             border-left: 4px solid var(--primary);
             position: relative;
             margin-bottom: 10px;
-            padding-right: 45px; /* Запас места для маленькой кнопки */
         }
-        .admin-req-header { color: #8a8dff; font-size: 11px; font-weight: bold; }
-        .admin-req-body { font-size: 13px; color: #fff; opacity: 0.9; display: block; margin-top: 4px; }
-        
-        /* Измененная кнопка DEL */
+
         .btn-del-small {
-            position: absolute; 
-            top: 6px; 
-            right: 6px;
-            width: 35px; /* Около 1-1.5 см */
-            height: 18px;
-            background: rgba(239, 68, 68, 0.15); 
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2); 
-            border-radius: 4px;
-            font-size: 8px; 
-            font-weight: 800;
+            position: absolute; top: 6px; right: 6px; width: 35px; height: 18px;
+            background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 4px; font-size: 8px; font-weight: 800; cursor: pointer;
+        }
+
+        /* ИНТЕГРИРОВАННЫЕ CSS КОМПОНЕНТЫ ЗАДАНИЙ И ЧАТА */
+        .task-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: 0.2s;
-            padding: 0;
-            margin: 0;
+            position: relative;
         }
-        .btn-del-small:hover {
-            background: rgba(239, 68, 68, 0.4);
-            border-color: #ef4444;
-            transform: scale(1.05);
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary);
         }
+        .task-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .task-badge.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .task-badge.completed { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+
+        .task-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 450px;
+            z-index: 3000;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: none;
+        }
+        .chat-msg {
+            padding: 6px 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .chat-msg.admin-style { background: rgba(99, 102, 241, 0.2); align-self: flex-start; }
+        .chat-msg.user-style { background: rgba(255, 255, 255, 0.08); align-self: flex-end; }
     </style>
 </head>
 <body>
 
 <div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
+<div id="side-drawer" class="side-drawer">
+    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос</h3>
+    <textarea id="request-text" style="height: 150px; padding: 12px; margin-bottom: 15px;" placeholder="Опиши свою просьбу или вопрос..."></textarea>
+    <button onclick="sendRequestToServer()">Отправить запрос</button>
+    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
+</div>
 
 <div id="fab-btn" class="fab-request" onclick="toggleDrawer()">
     <i class="fas fa-comment-dots"></i>
 </div>
 
-<div id="side-drawer" class="side-drawer">
-    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос для Макса или Отца</h3>
-    <p style="font-size: 12px; opacity: 0.6; margin-bottom: 20px;">Чушь не писать. Приследуется по закону!</p>
-    <textarea id="request-text" style="height: 150px; padding: 12px 15px; margin-bottom: 15px;" placeholder="Сообщение для Макса"></textarea>
-    <button onclick="sendRequestToServer()">Отправить запрос</button>
-    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
+<div id="admin-modal" class="modal-full">
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <button onclick="closeAdminModal()" style="width: auto; background: #334155; margin-right: 20px;">✕ Закрыть</button>
+        <h2 id="modal-title" style="margin:0; color: var(--primary);">История</h2>
+    </div>
+    <div style="overflow-y: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Сообщение</th>
+                    <th>Штраф</th>
+                    <th>Пополнение</th>
+                </tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ИНТЕГРИРОВАННЫЕ ОКНА: СОЗДАНИЕ И ЧАТ ЗАДАНИЙ -->
+<div id="modal-task-create" class="task-modal">
+    <h3 style="margin-top:0; color:var(--primary);">Новое задание</h3>
+    <div class="input-group"><i class="fas fa-heading"></i><input type="text" id="nt-title" placeholder="Название"></div>
+    <div class="input-group"><i class="fas fa-align-left"></i><textarea id="nt-desc" placeholder="Описание" style="height:80px; padding-left:35px;"></textarea></div>
+    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="nt-points" placeholder="Баллы"></div>
+    <div class="input-group"><i class="fas fa-user"></i>
+        <select id="nt-assignee" style="width:100%; padding:10px 10px 10px 35px; background:rgba(15,23,42,0.7); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:white;">
+            <option value="svyat">svyat</option>
+            <option value="misha">misha</option>
+            <option value="all">Все (all)</option>
+        </select>
+    </div>
+    <button style="background:var(--success)" onclick="createTask()">Создать задание</button>
+    <button style="background:transparent; border:1px solid #475569;" onclick="document.getElementById('modal-task-create').style.display='none'">Отмена</button>
+</div>
+
+<div id="modal-task-view" class="task-modal" style="max-width: 500px;">
+    <h3 id="vt-title" style="margin-top:0; color:var(--primary); margin-bottom:5px;"></h3>
+    <div style="font-size:12px; opacity:0.6; margin-bottom:10px;" id="vt-meta"></div>
+    <p id="vt-desc" style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; font-size:13px; margin-bottom:15px;"></p>
+    
+    <div class="panel-title" style="margin-bottom:5px; font-size:11px;"><i class="fas fa-comments"></i> ОБСУЖДЕНИЕ</div>
+    <div id="vt-chat-box" style="height:180px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
+    
+    <div class="input-group" style="margin-bottom:15px;">
+        <input type="text" id="vt-chat-input" placeholder="Напишите сообщение..." style="padding-right:60px;">
+        <button onclick="sendMessage()" style="position:absolute; right:5px; top:5px; width:auto; padding:5px 12px; font-size:12px; margin:0;">Отправить</button>
+    </div>
+    
+    <div id="vt-actions" style="display:grid; grid-template-columns:1fr; gap:10px;"></div>
+    <button style="background:#475569; margin-top:10px;" onclick="closeTaskModal()">Закрыть</button>
 </div>
 
 <div class="container">
@@ -249,46 +337,14 @@
             <div style="font-weight: bold; font-size: 18px;">
                 <i class="fas fa-user-circle"></i> <span id="user-name"></span>
             </div>
-            <button onclick="location.reload()" style="width: auto; padding: 8px 15px; background: #334155; margin:0;">
+            <button onclick="logout()" style="width: auto; padding: 8px 15px; background: #334155; margin:0;">
                 <i class="fas fa-sign-out-alt"></i> Выход
             </button>
         </div>
 
         <div class="dashboard">
-            <div class="left-col">
-                <div class="balance-card">
-                    <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Мой счет</div>
-                    <div class="balance-amount"><span id="balance-val">0</span> Б</div>
-                </div>
-                <div class="history-box" id="history-box">
-                    <div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>
-                </div>
-            </div>
-
-            <div class="right-col">
-                <div class="panel-section">
-                    <div class="panel-title"><i class="fas fa-paper-plane"></i> Быстрый перевод</div>
-                    <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Логин получателя"></div>
-                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
-                    <button style="background: var(--success);" onclick="sendMoney()">Отправить средства</button>
-                </div>
-
-                <div id="admin-panel" class="panel-section" style="border-color: var(--accent); display:none;">
-                    <div class="panel-title" style="color: var(--accent);"><i class="fas fa-user-shield"></i> Управление</div>
-                    <div class="input-group"><i class="fas fa-wallet"></i><input type="text" id="edit-target-money" placeholder="Логин для начисления"></div>
-                    <div class="input-group"><i class="fas fa-plus"></i><input type="number" id="edit-balance-add" placeholder="Сумма"></div>
-                    <button style="background: var(--accent);" onclick="adminAddMoney()">Начислить</button>
-                    <hr style="opacity: 0.1; margin: 15px 0;">
-                    <div class="input-group"><i class="fas fa-id-badge"></i><input type="text" id="acc-old-login" placeholder="Кого изменить?"></div>
-                    <div class="input-group"><i class="fas fa-user-tag"></i><input type="text" id="acc-new-login" placeholder="Новый логин"></div>
-                    <button onclick="adminEditAccount()" style="background: #475569;">Обновить данные</button>
-                </div>
-
-                <div id="admin-req-section" class="panel-section" style="display:none;">
-                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Запросы от детей</div>
-                    <div id="admin-requests-container"></div>
-                </div>
-            </div>
+            <div id="left-column"></div>
+            <div id="right-column"></div>
         </div>
     </div>
 </div>
@@ -307,153 +363,348 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentLogin = null;
-
     const admins = ['maxS', 'maxA'];
-    function checkAdmin(user) { return admins.includes(user); }
+    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    let activeTaskId = null;
 
-    function auth() {
+    window.onload = function() {
+        const sl = localStorage.getItem('gcoin_login'), sp = localStorage.getItem('gcoin_pass');
+        if (sl && sp) {
+            document.getElementById('login-input').value = sl;
+            document.getElementById('pass-input').value = sp;
+            auth(true);
+        }
+    };
+
+    function auth(isAuto = false) {
         const login = document.getElementById('login-input').value.trim();
         const pass = document.getElementById('pass-input').value;
-        if (!login || !pass) return alert("Введите логин и пароль");
-
+        if (!login || !pass) return;
         db.ref('users/' + login).once('value', (snap) => {
-            if (snap.exists()) {
-                if (snap.val().password === pass) goMain(login);
-                else alert("Неверный пароль");
-            } else {
-                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => goMain(login));
-            }
+            if (snap.exists() && snap.val().password === pass) {
+                localStorage.setItem('gcoin_login', login);
+                localStorage.setItem('gcoin_pass', pass);
+                renderUI(login);
+            } else if (!snap.exists()) {
+                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => renderUI(login));
+            } else if (!isAuto) alert("Ошибка доступа");
         });
     }
 
-    function goMain(login) {
+    function logout() { localStorage.clear(); location.reload(); }
+
+    function renderUI(login) {
         currentLogin = login;
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('main-screen').classList.add('active');
         document.getElementById('user-name').innerText = login;
-        document.getElementById('fab-btn').style.display = 'flex';
+        const leftCol = document.getElementById('left-column');
+        const rightCol = document.getElementById('right-column');
+        leftCol.innerHTML = ''; rightCol.innerHTML = '';
 
-        if (checkAdmin(login)) {
-            document.getElementById('admin-panel').style.display = 'block';
-            document.getElementById('admin-req-section').style.display = 'block';
-            initAdminRequests();
-        }
+        const isAdmin = admins.includes(login);
 
-        db.ref('users/' + login + '/balance').on('value', (s) => {
-            document.getElementById('balance-val').innerText = s.val() || 0;
-        });
-
-        db.ref('history').limitToLast(10).on('value', (snap) => {
-            const box = document.getElementById('history-box');
-            box.innerHTML = '<div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>';
-            snap.forEach(child => {
-                const d = child.val();
-                if (d.from === login || d.to === login) {
-                    const isOut = d.from === login;
-                    box.innerHTML += `
-                        <div class="trans-item">
-                            <span style="color:${isOut?'#f87171':'#4ade80'}; font-weight:bold;">
-                                ${isOut?'-': '+'} ${d.amount}$
-                            </span>
-                            <div style="font-size:11px; opacity:0.6;">${isOut?'Кому: '+d.to : 'От: '+d.from}</div>
-                        </div>`;
-                }
+        if (isAdmin) {
+            // АДМИН (ЛЕВАЯ ЧАСТЬ)
+            document.getElementById('fab-btn').style.display = 'none';
+            ['svyat', 'misha'].forEach(user => {
+                const section = document.createElement('div');
+                section.className = 'panel-section';
+                section.innerHTML = `
+                    <div class="panel-title" style="justify-content:space-between">
+                        <span><i class="fas fa-user-gear"></i> ${user.toUpperCase()}</span>
+                        <span id="bal-${user}" style="color:var(--primary)">0 Б</span>
+                    </div>
+                    <div class="input-group"><i class="fas fa-comment"></i><input type="text" id="msg-${user}" placeholder="Сообщение"></div>
+                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amt-${user}" placeholder="Сумма"></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <button style="background:var(--success)" onclick="adminAction('${user}', 'plus')">Пополнить</button>
+                        <button style="background:var(--accent)" onclick="adminAction('${user}', 'minus')">Штраф</button>
+                    </div>
+                    <button style="background:#475569; margin-top:5px" onclick="openAdminModal('${user}')">Таблица истории</button>
+                `;
+                leftCol.appendChild(section);
+                db.ref(`users/${user}/balance`).on('value', s => {
+                    document.getElementById(`bal-${user}`).innerText = (s.val() || 0) + ' Б';
+                });
             });
-        });
+
+            // ПРАВАЯ ЧАСТЬ (ВАРИАНТ 1: Сверху Requests меньше, Снизу Tasks)
+            rightCol.innerHTML = `
+                <div class="panel-section" style="display:flex; flex-direction:column; max-height:260px; margin-bottom:20px;">
+                    <div class="panel-title"><i class="fas fa-envelope-open-text"></i> Запросы</div>
+                    <div id="admin-requests-container" style="overflow-y:auto; flex:1;"></div>
+                </div>
+                <div class="panel-section" style="display:flex; flex-direction:column; min-height:280px;">
+                    <div class="panel-title" style="justify-content:space-between; align-items:center;">
+                        <span><i class="fas fa-tasks"></i> Задания / Tasks</span>
+                        <button style="width:auto; margin:0; padding:6px 12px; font-size:12px; background:var(--success)" onclick="document.getElementById('modal-task-create').style.display='block'">+ Создать</button>
+                    </div>
+                    <div id="tasks-container" style="overflow-y:auto; flex:1;"></div>
+                </div>
+            `;
+            initAdminRequests();
+            loadTasks(true);
+
+        } else {
+            // ПОЛЬЗОВАТЕЛЬ (ЛЕВАЯ ЧАСТЬ)
+            document.getElementById('fab-btn').style.display = 'flex';
+            leftCol.innerHTML = `<div class="balance-card"><div style="font-size:11px; opacity:0.8;">МОЙ СЧЕТ</div><div class="balance-amount" id="balance-val">0 Б</div></div>
+                <div class="history-box" id="history-box"><div class="panel-title">ОПЕРАЦИИ</div></div>`;
+            
+            // ПРАВАЯ ЧАСТЬ (ВАРИАНТ 1: Сверху Перевод, Снизу Tasks)
+            rightCol.innerHTML = `
+                <div class="panel-section" style="margin-bottom:20px;">
+                    <div class="panel-title">ПЕРЕВОД</div>
+                    <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Кому"></div>
+                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
+                    <button style="background:var(--success)" onclick="sendMoney()">Отправить</button>
+                </div>
+                <div class="panel-section" style="display:flex; flex-direction:column; min-height:250px;">
+                    <div class="panel-title"><i class="fas fa-tasks"></i> Мои Задания</div>
+                    <div id="tasks-container" style="overflow-y:auto; flex:1;"></div>
+                </div>
+            `;
+            db.ref(`users/${login}/balance`).on('value', s => document.getElementById('balance-val').innerText = (s.val() || 0) + ' Б');
+            initUserHistory(login);
+            loadTasks(false);
+        }
     }
 
+    // Управление шторкой
     function toggleDrawer() {
         const dr = document.getElementById('side-drawer');
         const ov = document.getElementById('drawer-overlay');
-        const isOpen = dr.classList.contains('open');
         dr.classList.toggle('open');
-        ov.style.display = isOpen ? 'none' : 'block';
+        ov.style.display = dr.classList.contains('open') ? 'block' : 'none';
     }
 
     function sendRequestToServer() {
         const txt = document.getElementById('request-text').value.trim();
-        if (!txt) return alert("Введите текст сообщения");
-
+        if (!txt) return alert("Напиши сообщение!");
         db.ref('requests').push({
             from: currentLogin,
             text: txt,
             timestamp: Date.now()
-        }).then(() => {
-            alert("Запрос успешно отправлен!");
-            document.getElementById('request-text').value = '';
-            toggleDrawer();
         });
+        alert("Запрос отправлен!");
+        document.getElementById('request-text').value = '';
+        toggleDrawer();
     }
 
-    function initAdminRequests() {
-        db.ref('requests').on('value', (snapshot) => {
-            const reqs = snapshot.val() || {};
-            const container = document.getElementById('admin-requests-container');
-            container.innerHTML = '';
-            
-            const entries = Object.entries(reqs).reverse();
-            if (entries.length === 0) {
-                container.innerHTML = '<div style="color:gray; font-size:12px; text-align:center;">Запросов нет</div>';
-                return;
-            }
+    function adminAction(user, type) {
+        const amt = parseInt(document.getElementById(`amt-${user}`).value);
+        const msg = document.getElementById(`msg-${user}`).value.trim();
+        if (!amt || !msg) return alert("Заполни данные!");
+        const change = type === 'plus' ? amt : -amt;
+        db.ref(`users/${user}/balance`).transaction(c => (c || 0) + change);
+        db.ref('history').push({ from: type==='plus'?'Центробанк':user, to: type==='plus'?user:'Штраф', amount: amt, reason: msg, timestamp: Date.now() });
+        document.getElementById(`amt-${user}`).value = ''; document.getElementById(`msg-${user}`).value = '';
+    }
 
-            entries.forEach(([id, r]) => {
-                container.innerHTML += `
-                    <div class="admin-req-item">
-                        <span class="admin-req-header">ОТ: ${r.from}</span>
-                        <span class="admin-req-body">${r.text}</span>
-                        <button class="btn-del-small" onclick="deleteRequest('${id}')">DEL</button>
-                    </div>
-                `;
+    function openAdminModal(user) {
+        document.getElementById('modal-title').innerText = "История: " + user.toUpperCase();
+        document.getElementById('admin-modal').classList.add('active');
+        db.ref('history').on('value', snap => {
+            const tbody = document.getElementById('modal-table-body');
+            tbody.innerHTML = '';
+            const list = [];
+            snap.forEach(c => { if(c.val().from === user || c.val().to === user) list.push(c.val()); });
+            list.reverse().forEach(d => {
+                const isPlus = d.to === user;
+                const dt = new Date(d.timestamp);
+                tbody.innerHTML += `<tr>
+                    <td style="font-size:10px">${dt.toLocaleDateString()} (${days[dt.getDay()]})</td>
+                    <td>${d.reason}</td>
+                    <td style="color:var(--accent)">${!isPlus ? d.amount : ''}</td>
+                    <td style="color:var(--success)">${isPlus ? d.amount : ''}</td>
+                </tr>`;
             });
         });
     }
 
-    function deleteRequest(id) {
-        if (confirm("Удалить запись?")) db.ref('requests/' + id).remove();
+    function closeAdminModal() { document.getElementById('admin-modal').classList.remove('active'); db.ref('history').off(); }
+
+    function initAdminRequests() {
+        db.ref('requests').on('value', snap => {
+            const container = document.getElementById('admin-requests-container');
+            if (!container) return;
+            container.innerHTML = '';
+            Object.entries(snap.val() || {}).reverse().forEach(([id, r]) => {
+                container.innerHTML += `<div class="admin-req-item">
+                    <div style="font-size:10px; color:var(--primary)">ОТ: ${r.from}</div>
+                    <div style="font-size:13px">${r.text}</div>
+                    <button class="btn-del-small" onclick="db.ref('requests/${id}').remove()">DEL</button></div>`;
+            });
+        });
     }
 
     function sendMoney() {
-        const target = document.getElementById('target-user').value.trim();
-        const amount = parseInt(document.getElementById('amount-input').value);
-        if (!target || !amount || amount <= 0) return alert("Введите корректные данные");
+        const target = document.getElementById('target-user').value.trim(), amt = parseInt(document.getElementById('amount-input').value);
+        if (!target || !amt || amt <= 0) return;
+        db.ref(`users/${target}`).once('value', s => {
+            if (!s.exists()) return alert("Нет такого юзера");
+            db.ref(`users/${currentLogin}/balance`).once('value', ms => {
+                if (ms.val() < amt) return alert("Мало баллов");
+                db.ref(`users/${currentLogin}/balance`).set(ms.val() - amt);
+                db.ref(`users/${target}/balance`).transaction(b => (b || 0) + amt);
+                db.ref('history').push({ from: currentLogin, to: target, amount: amt, timestamp: Date.now(), reason: 'Перевод' });
+                alert("Переведено!");
+            });
+        });
+    }
 
-        db.ref('users/' + target).once('value', (tsnap) => {
-            if (!tsnap.exists()) return alert("Пользователь не найден");
-            db.ref('users/' + currentLogin + '/balance').once('value', (msnap) => {
-                const myB = msnap.val() || 0;
-                if (myB < amount) return alert("Недостаточно средств");
+    function initUserHistory(login) {
+        db.ref('history').on('value', snap => {
+            const box = document.getElementById('history-box');
+            if (!box) return;
+            box.innerHTML = '<div class="panel-title">ОПЕРАЦИИ</div>';
+            const list = [];
+            snap.forEach(c => { if(c.val().from === login || c.val().to === login) list.push(c.val()); });
+            list.reverse().slice(0,10).forEach(d => {
+                const isOut = d.from === login;
+                box.innerHTML += `<div class="trans-item">
+                    <span style="color:${isOut?'#f87171':'#4ade80'}">${isOut?'-':'+'} ${d.amount} Б</span>
+                    <div style="font-size:11px; opacity:0.6">${d.reason || (isOut?'Кому: '+d.to : 'От: '+d.from)}</div></div>`;
+            });
+        });
+    }
+
+    // ЛОГИКА ОПЕРАЦИЙ ЗАДАНИЙ (TASKS)
+    function createTask() {
+        const title = document.getElementById('nt-title').value.trim();
+        const desc = document.getElementById('nt-desc').value.trim();
+        const points = parseInt(document.getElementById('nt-points').value);
+        const assignee = document.getElementById('nt-assignee').value;
+
+        if (!title || !desc || !points) return alert("Заполните все поля задания!");
+
+        const taskData = {
+            title: title,
+            description: desc,
+            points: points,
+            assignedTo: assignee,
+            createdBy: currentLogin,
+            status: 'pending'
+        };
+
+        db.ref('tasks').push(taskData).then(() => {
+            document.getElementById('nt-title').value = '';
+            document.getElementById('nt-desc').value = '';
+            document.getElementById('nt-points').value = '';
+            document.getElementById('modal-task-create').style.display = 'none';
+        });
+    }
+
+    function loadTasks(isAdminRole) {
+        db.ref('tasks').on('value', snap => {
+            const container = document.getElementById('tasks-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            Object.entries(snap.val() || {}).reverse().forEach(([id, t]) => {
+                if (!isAdminRole && t.assignedTo !== currentLogin && t.assignedTo !== 'all') return;
+
+                const item = document.createElement('div');
+                item.className = 'task-item';
                 
-                db.ref('users/' + currentLogin + '/balance').set(myB - amount);
-                db.ref('users/' + target + '/balance').transaction(b => (b || 0) + amount);
-                db.ref('history').push({ from: currentLogin, to: target, amount: amount });
-                alert("Перевод выполнен!");
-                document.getElementById('amount-input').value = '';
+                const isCompleted = t.status === 'completed';
+                const badgeClass = isCompleted ? 'completed' : 'pending';
+                const badgeText = isCompleted ? 'Выполнено' : 'В процессе';
+                const scopeText = t.assignedTo === 'all' ? 'ДЛЯ ВСЕХ' : t.assignedTo.toUpperCase();
+
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:11px; color:var(--primary); font-weight:bold;">${scopeText}</span>
+                        <span class="task-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">${t.title}</div>
+                    <div style="font-size:12px; color:var(--success); font-weight:bold;">+${t.points} Б</div>
+                `;
+                
+                item.onclick = () => openTaskModal(id, t);
+                container.appendChild(item);
             });
         });
     }
 
-    function adminAddMoney() {
-        const t = document.getElementById('edit-target-money').value.trim();
-        const a = parseInt(document.getElementById('edit-balance-add').value);
-        if(!t || isNaN(a)) return alert("Заполните поля");
-        db.ref('users/' + t + '/balance').transaction(curr => (curr || 0) + a);
-        db.ref('history').push({ from: "Ценра-банк", to: t, amount: a });
-        alert("Успешно начислено");
+    function openTaskModal(id, task) {
+        activeTaskId = id;
+        document.getElementById('vt-title').innerText = task.title;
+        document.getElementById('vt-desc').innerText = task.description;
+        document.getElementById('vt-meta').innerText = `Баллы: ${task.points} | Кому: ${task.assignedTo.toUpperCase()} | Статус: ${task.status === 'completed' ? 'Выполнено' : 'Активно'}`;
+        document.getElementById('modal-task-view').style.display = 'block';
+
+        db.ref(`tasks/${id}/messages`).on('value', snap => {
+            const box = document.getElementById('vt-chat-box');
+            box.innerHTML = '';
+            snap.forEach(m => {
+                const msg = m.val();
+                const isMyMsg = msg.sender === currentLogin;
+                box.innerHTML += `
+                    <div class="chat-msg ${isMyMsg ? 'user-style' : 'admin-style'}">
+                        <div style="font-size:9px; opacity:0.6; font-weight:bold; margin-bottom:2px;">${msg.sender}</div>
+                        <div>${msg.text}</div>
+                    </div>
+                `;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        const actions = document.getElementById('vt-actions');
+        actions.innerHTML = '';
+
+        if (admins.includes(currentLogin)) {
+            actions.innerHTML = `<button style="background:var(--accent); margin:0;" onclick="deleteTask('${id}')">Удалить задание</button>`;
+        } else if (task.status !== 'completed') {
+            actions.innerHTML = `<button style="background:var(--success); margin:0;" onclick="completeTask('${id}', ${task.points}, '${task.assignedTo}')">Выполнено</button>`;
+        }
     }
 
-    function adminEditAccount() {
-        const oldL = document.getElementById('acc-old-login').value.trim();
-        const newL = document.getElementById('acc-new-login').value.trim();
-        if(!oldL || !newL) return alert("Заполните логины");
-        
-        db.ref('users/' + oldL).once('value', (snap) => {
-            if(!snap.exists()) return alert("Юзер не найден");
-            db.ref('users/' + newL).set(snap.val()).then(() => {
-                db.ref('users/' + oldL).remove();
-                alert("Логин изменен!");
-            });
+    function closeTaskModal() {
+        document.getElementById('modal-task-view').style.display = 'none';
+        if (activeTaskId) {
+            db.ref(`tasks/${activeTaskId}/messages`).off();
+            activeTaskId = null;
+        }
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('vt-chat-input');
+        const text = input.value.trim();
+        if (!text || !activeTaskId) return;
+
+        const msg = {
+            sender: currentLogin,
+            text: text,
+            timestamp: Date.now()
+        };
+
+        db.ref(`tasks/${activeTaskId}/messages`).push(msg).then(() => {
+            input.value = '';
         });
+    }
+
+    function completeTask(id, points, assignedTo) {
+        if (!confirm("Подтверждаешь выполнение задания?")) return;
+
+        db.ref(`tasks/${id}/status`).set('completed').then(() => {
+            if (assignedTo === 'all') {
+                db.ref(`users/${currentLogin}/balance`).transaction(c => (c || 0) + points);
+                db.ref('history').push({ from: 'Задание (Всем)', to: currentLogin, amount: points, reason: `Выполнено: общая задача`, timestamp: Date.now() });
+            } else {
+                db.ref(`users/${assignedTo}/balance`).transaction(c => (c || 0) + points);
+                db.ref('history').push({ from: 'Задание', to: assignedTo, amount: points, reason: `Выполнено персональное задание`, timestamp: Date.now() });
+            }
+            alert(`Задание выполнено! Вам начислено +${points} Б`);
+            closeTaskModal();
+        });
+    }
+
+    function deleteTask(id) {
+        if (!confirm("Удалить это задание окончательно?")) return;
+        closeTaskModal();
+        db.ref(`tasks/${id}`).remove();
     }
 </script>
 </body>
