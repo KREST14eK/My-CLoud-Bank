@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>История SVYAT</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Переключить тему">
+        <i class="fas fa-sun"></i>
+        <span>Светлый</span>
+    </button>
+
+    <div class="container history-page">
+        <div class="history-header">
+            <a href="main.html" class="history-back">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+            <div>
+                <div class="history-eyebrow">История аккаунта</div>
+                <h2 class="history-title">SVYAT</h2>
+            </div>
+        </div>
+
+        <div class="history-summary-card">
+            <div class="history-summary-pill"><i class="fas fa-clock"></i> Последние операции</div>
+            <div id="history-list" class="history-list"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            loadHistoryPage('svyat');
+        });
+    </script>
+</body>
+</html>
